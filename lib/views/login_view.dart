@@ -1,4 +1,3 @@
-import 'dart:developer' as devtools show log;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
@@ -68,6 +67,21 @@ class _LoginViewState extends State<LoginView> {
                   email: email,
                   password: password,
                 );
+                final user = FirebaseAuth.instance.currentUser;
+                if (user?.emailVerified == false) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "Please verify your email before logging in.",
+                  );
+                  navigator.pushNamedAndRemoveUntil(
+                    verifyEmailRoute,
+                    (_) => false,
+                  );
+                  return;
+                }
                 navigator.pushNamedAndRemoveUntil(
                   notesRoute,
                   (route) => false,
@@ -81,7 +95,6 @@ class _LoginViewState extends State<LoginView> {
                     context,
                     "Email not found. Please enter an existing email or register.",
                   );
-                  devtools.log('User not found.');
                 } else if (e.code == 'wrong-password') {
                   if (!context.mounted) {
                     return;
@@ -90,7 +103,6 @@ class _LoginViewState extends State<LoginView> {
                     context,
                     "Invalid password. Please try again.",
                   );
-                  devtools.log('Wrong password.');
                 } else if (e.code == 'invalid-email') {
                   if (!context.mounted) {
                     return;
@@ -99,7 +111,6 @@ class _LoginViewState extends State<LoginView> {
                     context,
                     "Invalid email. Please enter a valid email.",
                   );
-                  devtools.log('The email entered is invalid.');
                 } else {
                   if (!context.mounted) {
                     return;
@@ -117,7 +128,6 @@ class _LoginViewState extends State<LoginView> {
                   context,
                   e.toString(),
                 );
-                devtools.log('An error occurred: $e');
               }
             },
             style: TextButton.styleFrom(

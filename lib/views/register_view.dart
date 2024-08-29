@@ -1,4 +1,3 @@
-import 'dart:developer' as devtools show log;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
@@ -68,10 +67,9 @@ class _RegisterViewState extends State<RegisterView> {
                   email: email,
                   password: password,
                 );
-                navigator.pushNamedAndRemoveUntil(
-                  loginRoute,
-                  (route) => false,
-                );
+                final user = FirebaseAuth.instance.currentUser;
+                await user?.sendEmailVerification();
+                navigator.pushNamed(verifyEmailRoute);
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {
                   if (!context.mounted) {
@@ -81,7 +79,6 @@ class _RegisterViewState extends State<RegisterView> {
                     context,
                     "Provided password is too weak.",
                   );
-                  devtools.log('The password provided is too weak.');
                 } else if (e.code == 'email-already-in-use') {
                   if (!context.mounted) {
                     return;
@@ -90,7 +87,6 @@ class _RegisterViewState extends State<RegisterView> {
                     context,
                     "Email is already in use. Please enter another email.",
                   );
-                  devtools.log('The account already exists for that email.');
                 } else if (e.code == 'invalid-email') {
                   if (!context.mounted) {
                     return;
@@ -99,8 +95,23 @@ class _RegisterViewState extends State<RegisterView> {
                     context,
                     "Invalid email. Please enter a valid email.",
                   );
-                  devtools.log('The email entered is invalid.');
+                } else {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "${e.code}.",
+                  );
                 }
+              } catch (e) {
+                if (!context.mounted) {
+                  return;
+                }
+                await showErrorDialog(
+                  context,
+                  e.toString(),
+                );
               }
             },
             style: TextButton.styleFrom(
