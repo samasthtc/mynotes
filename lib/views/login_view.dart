@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
-import 'package:mynotes/views/utilities/show_error_dialog.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -63,57 +64,56 @@ class _LoginViewState extends State<LoginView> {
               final navigator = Navigator.of(context);
 
               try {
-                await FirebaseAuth.instance.signInWithEmailAndPassword(
+                await AuthService.firebase().login(
                   email: email,
                   password: password,
                 );
-                final user = FirebaseAuth.instance.currentUser;
-                if (user?.emailVerified ?? false) {
+                final user = AuthService.firebase().currentUser;
+                if (user?.isEmailVerified ?? false) {
                   navigator.pushNamedAndRemoveUntil(
                     notesRoute,
                     (route) => false,
                   );
                 } else {
+                  // await AuthService.firebase().sendEmailVerification();
                   navigator.pushNamedAndRemoveUntil(
                     verifyEmailRoute,
                     (route) => false,
                   );
                   return;
                 }
-              } on FirebaseAuthException catch (e) {
-                if (e.code == 'user-not-found') {
-                  if (!context.mounted) {
-                    return;
-                  }
-                  await showErrorDialog(
-                    context,
-                    "Email not found. Please enter an existing email or register.",
-                  );
-                } else if (e.code == 'wrong-password') {
-                  if (!context.mounted) {
-                    return;
-                  }
-                  await showErrorDialog(
-                    context,
-                    "Invalid password. Please try again.",
-                  );
-                } else if (e.code == 'invalid-email') {
-                  if (!context.mounted) {
-                    return;
-                  }
-                  await showErrorDialog(
-                    context,
-                    "Invalid email. Please enter a valid email.",
-                  );
-                } else {
-                  if (!context.mounted) {
-                    return;
-                  }
-                  await showErrorDialog(
-                    context,
-                    "${e.code}.",
-                  );
+              } on UserNotFoundAuthException {
+                if (!context.mounted) {
+                  return;
                 }
+                await showErrorDialog(
+                  context,
+                  "Email not found. Please enter an existing email or register.",
+                );
+              } on WrongPasswordAuthException {
+                if (!context.mounted) {
+                  return;
+                }
+                await showErrorDialog(
+                  context,
+                  "Invalid password. Please try again.",
+                );
+              } on InvalidEmailAuthException {
+                if (!context.mounted) {
+                  return;
+                }
+                await showErrorDialog(
+                  context,
+                  "Invalid email. Please enter a valid email.",
+                );
+              } on GenericAuthException {
+                if (!context.mounted) {
+                  return;
+                }
+                await showErrorDialog(
+                  context,
+                  "Authentication failed. Please try again.",
+                );
               } catch (e) {
                 if (!context.mounted) {
                   return;
