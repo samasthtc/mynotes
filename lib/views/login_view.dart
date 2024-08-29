@@ -2,6 +2,7 @@ import 'dart:developer' as devtools show log;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/views/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -73,10 +74,50 @@ class _LoginViewState extends State<LoginView> {
                 );
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
-                  devtools.log('Invalid credentials. User not found.');
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "Email not found. Please enter an existing email or register.",
+                  );
+                  devtools.log('User not found.');
                 } else if (e.code == 'wrong-password') {
-                  devtools.log('Invalid credentials. Wrong password.');
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "Invalid password. Please try again.",
+                  );
+                  devtools.log('Wrong password.');
+                } else if (e.code == 'invalid-email') {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "Invalid email. Please enter a valid email.",
+                  );
+                  devtools.log('The email entered is invalid.');
+                } else {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "${e.code}.",
+                  );
                 }
+              } catch (e) {
+                if (!context.mounted) {
+                  return;
+                }
+                await showErrorDialog(
+                  context,
+                  e.toString(),
+                );
+                devtools.log('An error occurred: $e');
               }
             },
             style: TextButton.styleFrom(
