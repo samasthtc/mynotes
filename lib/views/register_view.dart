@@ -1,5 +1,4 @@
 import 'dart:developer' as devtools show log;
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -98,25 +97,5 @@ class _RegisterViewState extends State<RegisterView> {
         ],
       ),
     );
-    // Scaffold(
-    //   appBar: AppBar(
-    //     backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    //     title: const Text("Register"),
-    //   ),
-    //   body: FutureBuilder(
-    //     future: Firebase.initializeApp(
-    //       options: DefaultFirebaseOptions.currentPlatform,
-    //     ),
-    //     builder: (context, snapshot) {
-    //       switch (snapshot.connectionState) {
-    //         case ConnectionState.done:
-    //           return
-    //         default:
-    //           devtools.log('Loading...');
-    //           return const Text("Loading");
-    //       }
-    //     },
-    //   ),
-    // );
   }
 }

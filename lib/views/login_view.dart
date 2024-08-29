@@ -1,5 +1,4 @@
 import 'dart:developer' as devtools show log;
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -60,16 +59,18 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () async {
               final email = _email.text;
               final password = _password.text;
+              final navigator = Navigator.of(context);
 
               try {
-                final userCredential =
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                await FirebaseAuth.instance.signInWithEmailAndPassword(
                   email: email,
                   password: password,
                 );
-                devtools.log('$userCredential');
+                navigator.pushNamedAndRemoveUntil(
+                  '/notes/',
+                  (route) => false,
+                );
               } on FirebaseAuthException catch (e) {
-                // devtools.log('Firebase Error: ${e.code}\n${e.message}');
                 if (e.code == 'user-not-found') {
                   devtools.log('Invalid credentials. User not found.');
                 } else if (e.code == 'wrong-password') {
@@ -84,7 +85,7 @@ class _LoginViewState extends State<LoginView> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).restorablePushNamedAndRemoveUntil(
+              Navigator.of(context).pushNamedAndRemoveUntil(
                 '/register/',
                 (route) => false,
               );
@@ -97,25 +98,5 @@ class _LoginViewState extends State<LoginView> {
         ],
       ),
     );
-    // Scaffold(
-    //   appBar: AppBar(
-    //     backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    //     title: const Text("Login"),
-    //   ),
-    //   body: FutureBuilder(
-    //     future: Firebase.initializeApp(
-    //       options: DefaultFirebaseOptions.currentPlatform,
-    //     ),
-    //     builder: (context, snapshot) {
-    //       switch (snapshot.connectionState) {
-    //         case ConnectionState.done:
-    //           return;
-    //         default:
-    //           devtools.log('Loading...');
-    //           return const Text("Loading");
-    //       }
-    //     },
-    //   ),
-    // );
   }
 }
