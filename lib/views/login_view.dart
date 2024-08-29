@@ -1,3 +1,5 @@
+import 'dart:developer' as devtools show log;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -65,13 +67,13 @@ class _LoginViewState extends State<LoginView> {
                   email: email,
                   password: password,
                 );
-                debugPrint('$userCredential');
+                devtools.log('$userCredential');
               } on FirebaseAuthException catch (e) {
-                // debugPrint('Firebase Error: ${e.code}\n${e.message}');
+                // devtools.log('Firebase Error: ${e.code}\n${e.message}');
                 if (e.code == 'user-not-found') {
-                  debugPrint('Invalid credentials. User not found.');
+                  devtools.log('Invalid credentials. User not found.');
                 } else if (e.code == 'wrong-password') {
-                  debugPrint('Invalid credentials. Wrong password.');
+                  devtools.log('Invalid credentials. Wrong password.');
                 }
               }
             },
@@ -109,7 +111,7 @@ class _LoginViewState extends State<LoginView> {
     //         case ConnectionState.done:
     //           return;
     //         default:
-    //           debugPrint('Loading...');
+    //           devtools.log('Loading...');
     //           return const Text("Loading");
     //       }
     //     },

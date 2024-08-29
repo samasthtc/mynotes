@@ -1,3 +1,5 @@
+import 'dart:developer' as devtools show log;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -65,14 +67,14 @@ class _RegisterViewState extends State<RegisterView> {
                   email: email,
                   password: password,
                 );
-                debugPrint('$userCredential');
+                devtools.log('$userCredential');
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {
-                  debugPrint('The password provided is too weak.');
+                  devtools.log('The password provided is too weak.');
                 } else if (e.code == 'email-already-in-use') {
-                  debugPrint('The account already exists for that email.');
+                  devtools.log('The account already exists for that email.');
                 } else if (e.code == 'invalid-email') {
-                  debugPrint('The email entered is invalid.');
+                  devtools.log('The email entered is invalid.');
                 }
               }
             },
@@ -110,7 +112,7 @@ class _RegisterViewState extends State<RegisterView> {
     //         case ConnectionState.done:
     //           return
     //         default:
-    //           debugPrint('Loading...');
+    //           devtools.log('Loading...');
     //           return const Text("Loading");
     //       }
     //     },
