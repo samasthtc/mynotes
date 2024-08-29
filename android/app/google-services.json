@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "632276317104",
+    "project_id": "mynotes-oshoora1",
+    "storage_bucket": "mynotes-oshoora1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632276317104:android:e9ae6d99acd98699b2dc75",
+        "android_client_info": {
+          "package_name": "com.oshoora.mynotes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdUMo6zgpPzWTUBnRc9OSGALCzgGSezEg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
