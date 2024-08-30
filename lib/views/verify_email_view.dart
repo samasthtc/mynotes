@@ -10,7 +10,7 @@ class VerifyEmailView extends StatefulWidget {
 }
 
 class _VerifyEmailViewState extends State<VerifyEmailView> {
-  final userEmail = AuthService.firebase().currentUser?.email;
+  final userEmail = AuthService.firebase().currentUser?.email ?? "your email";
 
   @override
   Widget build(BuildContext context) {
