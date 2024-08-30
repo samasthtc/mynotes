@@ -14,6 +14,8 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  String? _emailError;
+  String? _passwordError;
 
   @override
   void initState() {
@@ -34,102 +36,121 @@ class _RegisterViewState extends State<RegisterView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Register"),
+        title: const Text(
+          "Register",
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
-      body: Column(
-        // mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextField(
-            controller: _email,
-            enableSuggestions: false,
-            autocorrect: false,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: "Enter your email",
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: TextField(
+                controller: _email,
+                enableSuggestions: false,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: "Enter your email",
+                  border: const OutlineInputBorder(),
+                  labelText: "Email",
+                  labelStyle: const TextStyle(color: Colors.black),
+                  errorText: _emailError,
+                  // focusedBorder: OutlineInputBorder(
+                  //   borderSide: BorderSide(color: Colors.black),
+                  // ),
+                ),
+              ),
             ),
-          ),
-          TextField(
-            controller: _password,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: "Enter your password",
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: TextField(
+                controller: _password,
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: InputDecoration(
+                  hintText: "Enter your password",
+                  border: const OutlineInputBorder(),
+                  labelText: "Password",
+                  labelStyle: const TextStyle(color: Colors.black),
+                  errorText: _passwordError,
+                ),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final email = _email.text;
-              final password = _password.text;
-              final navigator = Navigator.of(context);
+            TextButton(
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
+                final navigator = Navigator.of(context);
+                setState(() {
+                  _emailError = null; // Clear previous errors
+                  _passwordError = null;
+                });
 
-              try {
-                await AuthService.firebase().createUser(
-                  email: email,
-                  password: password,
-                );
-                await AuthService.firebase().sendEmailVerification();
-                navigator.pushNamed(verifyEmailRoute);
-              } on WeakPasswordAuthException {
-                if (!context.mounted) {
-                  return;
+                try {
+                  await AuthService.firebase().createUser(
+                    email: email,
+                    password: password,
+                  );
+                  await AuthService.firebase().sendEmailVerification();
+                  navigator.pushNamed(verifyEmailRoute);
+                } on EmailAlreadyInUseAuthException {
+                  setState(() {
+                    _emailError =
+                        "Email is already in use. Please enter another email.";
+                  });
+                } on InvalidEmailAuthException {
+                  setState(() {
+                    _emailError = "Invalid email. Please enter a valid email.";
+                  });
+                } on WeakPasswordAuthException {
+                  setState(() {
+                    _passwordError = "Provided password is too weak.";
+                  });
+                } on GenericAuthException {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    "An error occurred. Please try again.",
+                  );
+                } catch (e) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  await showErrorDialog(
+                    context,
+                    e.toString(),
+                  );
                 }
-                await showErrorDialog(
-                  context,
-                  "Provided password is too weak.",
-                );
-              } on EmailAlreadyInUseAuthException {
-                if (!context.mounted) {
-                  return;
-                }
-                await showErrorDialog(
-                  context,
-                  "Email is already in use. Please enter another email.",
-                );
-              } on InvalidEmailAuthException {
-                if (!context.mounted) {
-                  return;
-                }
-                await showErrorDialog(
-                  context,
-                  "Invalid email. Please enter a valid email.",
-                );
-              } on GenericAuthException {
-                if (!context.mounted) {
-                  return;
-                }
-                await showErrorDialog(
-                  context,
-                  "An error occurred. Please try again.",
-                );
-              } catch (e) {
-                if (!context.mounted) {
-                  return;
-                }
-                await showErrorDialog(
-                  context,
-                  e.toString(),
-                );
-              }
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              ),
+              child: const Text("Register"),
             ),
-            child: const Text("Register"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).restorablePushNamedAndRemoveUntil(
-                loginRoute,
-                (route) => false,
-              );
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            ),
-            child: const Text("Registered? Back to Login!"),
-          )
-        ],
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).restorablePushNamedAndRemoveUntil(
+                  loginRoute,
+                  (route) => false,
+                );
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              ),
+              child: const Text("Registered? Back to Login!"),
+            )
+          ],
+        ),
       ),
     );
   }
