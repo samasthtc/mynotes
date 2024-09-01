@@ -34,8 +34,21 @@ class _NotesViewState extends State<NotesView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Main UI"),
+        title: const Text(
+          "Your Notes",
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(newNoteRoute);
+            },
+            icon: const Icon(Icons.add),
+            // color: const Color.fromARGB(255, 69, 1, 81),
+          ),
           PopupMenuButton<MenuAction>(
             onSelected: (action) async {
               devtools.log('$action');
@@ -57,7 +70,9 @@ class _NotesViewState extends State<NotesView> {
             itemBuilder: (context) => const [
               PopupMenuItem(
                 value: MenuAction.logout,
-                child: Text("Logout"),
+                child: Text(
+                  "Logout",
+                ),
               ),
             ],
           ),
@@ -80,7 +95,7 @@ class _NotesViewState extends State<NotesView> {
                 },
               );
             default:
-              devtools.log('Loading...');
+              devtools.log('Loading Notes...');
               return const CircularProgressIndicator();
           }
         },
