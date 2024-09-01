@@ -23,11 +23,11 @@ class _NotesViewState extends State<NotesView> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    _notesService.close();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _notesService.close();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class _NotesViewState extends State<NotesView> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text(
-          "Your Notes",
+          "📓 Your Notes",
           style: TextStyle(
             fontSize: 24.0,
             fontWeight: FontWeight.w700,
@@ -88,7 +88,45 @@ class _NotesViewState extends State<NotesView> {
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                      return const Text("Waiting for all notes...");
+                    case ConnectionState.active:
+                      if (snapshot.hasData) {
+                        final allNotes = snapshot.data as List<DatabaseNote>;
+                        return ListView.builder(
+                          itemCount: allNotes.length,
+                          itemBuilder: (context, index) {
+                            final note = allNotes[index];
+                            return ListTile(
+                              tileColor: Colors.pink[300],
+                              title: Text('Note ${index + 1}'),
+                              subtitle: Text(
+                                note.text,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              contentPadding: const EdgeInsets.only(
+                                  bottom: 16.0, left: 16.0, right: 16.0),
+                              onTap: () {},
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const CircularProgressIndicator();
+                      }
+                    // return const Text("Waiting for all notes...");
+                    // final notes = snapshot.data;
+                    // return ListView.builder(
+                    //   itemCount: notes?.length,
+                    //   itemBuilder: (context, index) {
+                    //     final note = notes[index];
+                    //     return ListTile(
+                    //       title: Text(note.title),
+                    //       subtitle: Text(note.content),
+                    //     );
+                    //   },
+                    // );
                     default:
                       return const CircularProgressIndicator();
                   }
