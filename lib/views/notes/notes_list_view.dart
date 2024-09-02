@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/services/crud/notes_service.dart';
 import 'package:mynotes/utilities/dialogs/delete_dialog.dart';
 
-typedef DeleteNoteCallback = void Function(DatabaseNote note);
+typedef NoteCallback = void Function(DatabaseNote note, int? index);
 
 class NotesListView extends StatelessWidget {
   final List<DatabaseNote> notes;
-  final DeleteNoteCallback onDeleteNote;
+  final NoteCallback onDeleteNote;
+  final NoteCallback onTap;
+
   const NotesListView({
     super.key,
     required this.notes,
     required this.onDeleteNote,
+    required this.onTap,
   });
 
   @override
@@ -18,9 +21,9 @@ class NotesListView extends StatelessWidget {
     return ListView.builder(
       itemCount: notes.length,
       itemBuilder: (context, index) {
-        final note = notes[index];
+        final note = notes.reversed.toList()[index];
         return ListTile(
-          tileColor: Colors.pink[300],
+          // tileColor: Colors.pink[300],
           title: Text('Note ${index + 1}'),
           subtitle: Text(
             note.text,
@@ -31,14 +34,16 @@ class NotesListView extends StatelessWidget {
             onPressed: () async {
               final shouldDelete = await showDeleteDialog(context);
               if (shouldDelete) {
-                onDeleteNote(note);
+                onDeleteNote(note, index);
               }
             },
             icon: const Icon(Icons.delete),
           ),
           contentPadding:
               const EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0),
-          onTap: () {},
+          onTap: () {
+            onTap(note, index);
+          },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
           ),

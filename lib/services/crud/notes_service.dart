@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:mynotes/extensions/list/filter.dart';
 import 'package:mynotes/services/crud/crud_constants.dart';
 import 'package:mynotes/services/crud/crud_exceptions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'dart:developer' as devtools show log;
 import 'package:path/path.dart' show join;
 
 class NotesService {
   Database? _db;
   List<DatabaseNote> _notes = [];
+  DatabaseUser? _user;
   // singleton
   static final NotesService _shared = NotesService._sharedInstance();
   factory NotesService() => _shared;
@@ -21,14 +24,32 @@ class NotesService {
   }
   late final StreamController<List<DatabaseNote>> _notesSteamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesSteamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesSteamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          devtools.log(' ${note.userId} == ${currentUser.id}');
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeReadingAllNotes();
+        }
+      });
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on CouldNotFindUser {
       final createdUser = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -212,7 +233,11 @@ class NotesService {
   Future<Iterable<DatabaseNote>> getAllNotes() async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-    final notes = await db.query(noteTable);
+    final notes = await db.query(
+      noteTable,
+      // where: '$userIdColumn = ?',
+      // whereArgs: [_user?.id],
+    );
     return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
   }
 
