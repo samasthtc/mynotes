@@ -22,11 +22,35 @@ class NotesListView extends StatelessWidget {
       itemCount: notes.length,
       itemBuilder: (context, index) {
         final note = notes.elementAt(notes.length - 1 - index);
+        final text = note.text;
+        String title = note.text;
+        String subtitle = 'No additional text';
+        const maxTitleLength = 30;
+
+        if (text.length > maxTitleLength) {
+          // Find the last space within maxTitleLength
+          int lastSpaceIndex =
+              text.substring(0, maxTitleLength).lastIndexOf(' ');
+
+          if (lastSpaceIndex != -1) {
+            title = text.substring(0, lastSpaceIndex);
+            subtitle = text.substring(lastSpaceIndex + 1);
+          } else {
+            // If no space is found, just cut the text at maxTitleLength
+            title = text.substring(0, maxTitleLength);
+            subtitle = text.substring(maxTitleLength);
+          }
+
+          title += '...';
+        }
         return ListTile(
           // tileColor: Colors.pink[300],
-          title: Text('Note ${index + 1}'),
+          title: Text(
+            title, // 'Note ${index + 1}'
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Text(
-            note.text,
+            subtitle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
