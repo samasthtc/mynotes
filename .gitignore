@@ -31,6 +31,9 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Ignore firebase_options.dart file
+**/firebase_options.dart
+
 # Symbolication related
 app.*.symbols
 
