@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show ReadContext;
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/enums/menu_action.dart';
 import 'dart:developer' as devtools show log;
 import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/cloud/cloud_note.dart';
 import 'package:mynotes/services/cloud/firebase_cloud_storage.dart';
 import 'package:mynotes/utilities/dialogs/logout_dialog.dart';
@@ -52,15 +55,19 @@ class _NotesViewState extends State<NotesView> {
               devtools.log('$action');
               switch (action) {
                 case MenuAction.logout:
-                  final navigator = Navigator.of(context);
+                  // final navigator = Navigator.of(context);
                   final shouldLogout = await showLogoutDialog(context);
 
                   if (shouldLogout) {
-                    await AuthService.firebase().logout();
-                    navigator.pushNamedAndRemoveUntil(
-                      loginRoute,
-                      (_) => false,
-                    );
+                    if (!context.mounted) {
+                      return;
+                    }
+                    context.read<AuthBloc>().add(const AuthEventLogout());
+                    // await AuthService.firebase().logout();
+                    // navigator.pushNamedAndRemoveUntil(
+                    //   loginRoute,
+                    //   (_) => false,
+                    // );
                   }
                   break;
               }
@@ -102,7 +109,9 @@ class _NotesViewState extends State<NotesView> {
                   },
                 );
               } else {
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
             // return const Text("Waiting for all notes...");
             // final notes = snapshot.data;
@@ -117,7 +126,9 @@ class _NotesViewState extends State<NotesView> {
             //   },
             // );
             default:
-              return const CircularProgressIndicator();
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
           }
         },
       ),

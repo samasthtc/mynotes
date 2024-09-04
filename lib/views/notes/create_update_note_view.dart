@@ -116,7 +116,7 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
                 await showCannotShareEmptyNoteDialog(context);
                 return;
               } else {
-                Share.share(text);
+                Share.share('$text\n\n\nShared via MyNotes');
               }
             },
             icon: const Icon(Icons.ios_share),
@@ -142,7 +142,9 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
                 ),
               );
             default:
-              return const CircularProgressIndicator();
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
           }
         },
       ),

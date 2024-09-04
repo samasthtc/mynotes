@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
-import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
-// import 'package:mynotes/services/crud/notes_service.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -89,31 +90,39 @@ class _LoginViewState extends State<LoginView> {
               onPressed: () async {
                 final email = _email.text;
                 final password = _password.text;
-                final navigator = Navigator.of(context);
+                // final navigator = Navigator.of(context);
                 setState(() {
                   _emailError = null; // Clear previous errors
                   _passwordError = null;
                 });
 
                 try {
-                  await AuthService.firebase().login(
-                    email: email,
-                    password: password,
+                  context.read<AuthBloc>().add(
+                    AuthEventLogin(
+                      email: email,
+                      password: password,
+                    ),
                   );
-                  final user = AuthService.firebase().currentUser;
-                  if (user?.isEmailVerified ?? false) {
-                    navigator.pushNamedAndRemoveUntil(
-                      notesRoute,
-                      (route) => false,
-                    );
-                  } else {
-                    // await AuthService.firebase().sendEmailVerification();
-                    navigator.pushNamedAndRemoveUntil(
-                      verifyEmailRoute,
-                      (route) => false,
-                    );
-                    return;
-                  }
+
+
+                  // await AuthService.firebase().login(
+                  //   email: email,
+                  //   password: password,
+                  // );
+                  // final user = AuthService.firebase().currentUser;
+                  // if (user?.isEmailVerified ?? false) {
+                  //   navigator.pushNamedAndRemoveUntil(
+                  //     notesRoute,
+                  //     (route) => false,
+                  //   );
+                  // } else {
+                  //   // await AuthService.firebase().sendEmailVerification();
+                  //   navigator.pushNamedAndRemoveUntil(
+                  //     verifyEmailRoute,
+                  //     (route) => false,
+                  //   );
+                  //   return;
+                  // }
                 } on UserNotFoundAuthException {
                   setState(() {
                     _emailError =
