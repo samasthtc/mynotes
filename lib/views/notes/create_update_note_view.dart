@@ -132,6 +132,7 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
+                  // autofocus: true,
                   controller: _textController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,

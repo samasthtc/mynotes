@@ -73,7 +73,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
               style: TextButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.inversePrimary,
               ),
-              child: const Text("Restart"),
+              child: const Text("Back to login page"),
             ),
           ],
         ),
