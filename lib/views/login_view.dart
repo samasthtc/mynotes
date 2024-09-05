@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/services/auth/bloc/auth_event.dart';
+import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
+import 'package:mynotes/utilities/dialogs/loading_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -18,6 +19,8 @@ class _LoginViewState extends State<LoginView> {
   late final TextEditingController _password;
   String? _emailError;
   String? _passwordError;
+
+  CloseDialog? _closeDialogHandle;
 
   @override
   void initState() {
@@ -35,143 +38,123 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text(
-          "Login",
-          style: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.w700,
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateLoggedOut) {
+          final closeDialog = _closeDialogHandle;
+          if (!state.isLoading && closeDialog != null) {
+            closeDialog();
+            _closeDialogHandle = null;
+          } else if (state.isLoading && closeDialog == null) {
+            _closeDialogHandle = showLoadingDialog(
+              context: context,
+              text: "Loading...",
+            );
+          }
+
+          if (state.exception is UserNotFoundAuthException ||
+              state.exception is WrongPasswordAuthException) {
+            setState(() {
+              _emailError = "Wrong credentials. Please try again.";
+              _passwordError = "Wrong credentials. Please try again.";
+            });
+          } else if (state.exception is InvalidEmailAuthException) {
+            setState(() {
+              _emailError = "Invalid email. Please enter a valid email.";
+            });
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(
+              context,
+              "Authentication failed. Please try again.",
+            );
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text(
+            "Login",
+            style: TextStyle(
+              fontSize: 24.0,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: TextField(
-                controller: _email,
-                enableSuggestions: false,
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: "Enter your email",
-                  border: const OutlineInputBorder(),
-                  labelText: "Email",
-                  labelStyle: const TextStyle(color: Colors.black),
-                  errorText: _emailError,
-                  // focusedBorder: OutlineInputBorder(
-                  //   borderSide: BorderSide(color: Colors.black),
-                  // ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: TextField(
+                  controller: _email,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: "Enter your email",
+                    border: const OutlineInputBorder(),
+                    labelText: "Email",
+                    labelStyle: const TextStyle(color: Colors.black),
+                    errorText: _emailError,
+                    // focusedBorder: OutlineInputBorder(
+                    //   borderSide: BorderSide(color: Colors.black),
+                    // ),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: TextField(
-                controller: _password,
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  hintText: "Enter your password",
-                  border: const OutlineInputBorder(),
-                  labelText: "Password",
-                  labelStyle: const TextStyle(color: Colors.black),
-                  errorText: _passwordError,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: TextField(
+                  controller: _password,
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: InputDecoration(
+                    hintText: "Enter your password",
+                    border: const OutlineInputBorder(),
+                    labelText: "Password",
+                    labelStyle: const TextStyle(color: Colors.black),
+                    errorText: _passwordError,
+                  ),
                 ),
               ),
-            ),
-            TextButton(
-              onPressed: () async {
-                final email = _email.text;
-                final password = _password.text;
-                // final navigator = Navigator.of(context);
-                setState(() {
-                  _emailError = null; // Clear previous errors
-                  _passwordError = null;
-                });
+              TextButton(
+                onPressed: () async {
+                  final email = _email.text;
+                  final password = _password.text;
+                  setState(() {
+                    _emailError = null;
+                    _passwordError = null;
+                  });
 
-                try {
                   context.read<AuthBloc>().add(
-                    AuthEventLogin(
-                      email: email,
-                      password: password,
-                    ),
-                  );
-
-
-                  // await AuthService.firebase().login(
-                  //   email: email,
-                  //   password: password,
-                  // );
-                  // final user = AuthService.firebase().currentUser;
-                  // if (user?.isEmailVerified ?? false) {
-                  //   navigator.pushNamedAndRemoveUntil(
-                  //     notesRoute,
-                  //     (route) => false,
-                  //   );
-                  // } else {
-                  //   // await AuthService.firebase().sendEmailVerification();
-                  //   navigator.pushNamedAndRemoveUntil(
-                  //     verifyEmailRoute,
-                  //     (route) => false,
-                  //   );
-                  //   return;
-                  // }
-                } on UserNotFoundAuthException {
-                  setState(() {
-                    _emailError =
-                        "Email not found. Please enter an existing email or register.";
-                  });
-                } on InvalidEmailAuthException {
-                  setState(() {
-                    _emailError = "Invalid email. Please enter a valid email.";
-                  });
-                } on WrongPasswordAuthException {
-                  setState(() {
-                    _passwordError = "Invalid password. Please try again.";
-                  });
-                } on GenericAuthException {
-                  if (!context.mounted) {
-                    return;
-                  }
-                  await showErrorDialog(
-                    context,
-                    "Authentication failed. Please try again.",
-                  );
-                } catch (e) {
-                  if (!context.mounted) {
-                    return;
-                  }
-                  await showErrorDialog(
-                    context,
-                    e.toString(),
-                  );
-                }
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                        AuthEventLogin(
+                          email: email,
+                          password: password,
+                        ),
+                      );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                ),
+                child: const Text("Login"),
               ),
-              child: const Text("Login"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  registerRoute,
-                  (route) => false,
-                );
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              ),
-              child: const Text("Not registered? Register here!"),
-            )
-          ],
+              TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(
+                        const AuthEventShouldRegister(),
+                      );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                ),
+                child: const Text("Not registered? Register here!"),
+              )
+            ],
+          ),
         ),
       ),
     );

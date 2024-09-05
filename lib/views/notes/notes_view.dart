@@ -55,7 +55,6 @@ class _NotesViewState extends State<NotesView> {
               devtools.log('$action');
               switch (action) {
                 case MenuAction.logout:
-                  // final navigator = Navigator.of(context);
                   final shouldLogout = await showLogoutDialog(context);
 
                   if (shouldLogout) {
@@ -63,11 +62,6 @@ class _NotesViewState extends State<NotesView> {
                       return;
                     }
                     context.read<AuthBloc>().add(const AuthEventLogout());
-                    // await AuthService.firebase().logout();
-                    // navigator.pushNamedAndRemoveUntil(
-                    //   loginRoute,
-                    //   (_) => false,
-                    // );
                   }
                   break;
               }
@@ -113,18 +107,6 @@ class _NotesViewState extends State<NotesView> {
                   child: CircularProgressIndicator(),
                 );
               }
-            // return const Text("Waiting for all notes...");
-            // final notes = snapshot.data;
-            // return ListView.builder(
-            //   itemCount: notes?.length,
-            //   itemBuilder: (context, index) {
-            //     final note = notes[index];
-            //     return ListTile(
-            //       title: Text(note.title),
-            //       subtitle: Text(note.content),
-            //     );
-            //   },
-            // );
             default:
               return const Center(
                 child: CircularProgressIndicator(),

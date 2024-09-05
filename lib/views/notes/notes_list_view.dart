@@ -28,7 +28,6 @@ class NotesListView extends StatelessWidget {
         const maxTitleLength = 30;
 
         if (text.length > maxTitleLength) {
-          // Find the last space within maxTitleLength
           int lastSpaceIndex =
               text.substring(0, maxTitleLength).lastIndexOf(' ');
 
@@ -36,7 +35,6 @@ class NotesListView extends StatelessWidget {
             title = text.substring(0, lastSpaceIndex);
             subtitle = text.substring(lastSpaceIndex + 1);
           } else {
-            // If no space is found, just cut the text at maxTitleLength
             title = text.substring(0, maxTitleLength);
             subtitle = text.substring(maxTitleLength);
           }
