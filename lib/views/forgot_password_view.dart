@@ -54,13 +54,21 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          centerTitle: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(24.0),
+            ),
+          ),
           title: const Text(
             "Forgot Password",
             style: TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.w700,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
             ),
           ),
+          elevation: 8,
+          shadowColor: const Color.fromARGB(120, 0, 0, 0),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16),
